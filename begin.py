@@ -1,6 +1,6 @@
 # 2 cells : dead or aline
 
-# if (cell on currentgen has 3 neighburs)
+# if (cell on   has 3 neighburs)
 # {cell will be alive nextgen}
 
 # if (cell on currentgen has exactly 2 neighburs)
@@ -30,7 +30,11 @@ WHITE = (255,255,255) #can use pygame.color too
 # do I need to comment that? :>
 CELL_COLOR = (77,0,0)
 
-GPS = 40
+GPS = 15
+#update per sec
+UPS = 60
+# 16 millisec
+WAIT_TIME = 1000 / GPS
 
 def main():
     #pygame init conf
@@ -50,10 +54,10 @@ def mainloop(screen):
     pause = True
     # gen time state, 0 at start
     gen = 0
-
+    timer = 0
     #event window interaction
     while True:
-        fps_clock.tick(GPS)
+        timer += fps_clock.tick(GPS)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -61,15 +65,27 @@ def mainloop(screen):
             if event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     pause = not pause
+                elif event.key == K_r:
+                    pause = True
+                    board = rand_board()
+                    gen = 0
+
+                elif event.key == K_c:
+                    pause = True
+                    board = new_board()
+                    gen = 0
+                render(screen, board)
             if event.type == MOUSEBUTTONDOWN:
                 x, y = event.pos
                 x //= SIZE
                 y //= SIZE
                 board[y][x] = not board[y][x]
 
-        if not pause :
-            board, gen = update(board, gen)
-        render(screen, board)
+        if timer > WAIT_TIME:
+            timer-= WAIT_TIME
+            if not pause :
+                board, gen = update(board, gen)
+            render(screen, board)
 
 
 def update(board, gen):
@@ -124,6 +140,10 @@ def new_board():
     board = [[False for x in range(NX)] for y in range(NY)]
     #print(board)
     return board
+
+def rand_board():
+    board = [[randint(0, 1) for x in range(NX)] for y in range(NY)]
+    return  board
 
 if __name__ == '__main__':
     main()
